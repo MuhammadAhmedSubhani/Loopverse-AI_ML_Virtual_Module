@@ -1,0 +1,383 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ARES ACCORD · Mission Control</title>
+<style>
+:root{--bg:#0b0d13;--p:#141824;--p2:#1b2132;--b:#2a3350;--fg:#e9ecf5;--mu:#8791ad;--ac:#ff6b3d;--ac2:#ffb347;--ok:#2fd49a;--no:#ff4d6d;--wn:#f5b942;--bl:#5aa9ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#2a1710 0,transparent 60%),var(--bg);color:var(--fg);font:14px/1.45 system-ui,"Segoe UI",sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--b);background:#0d1019cc;backdrop-filter:blur(6px);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:.14em;font-size:18px}.logo b{color:var(--ac)}.sp{flex:1}
+.pill{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;background:var(--p2);border:1px solid var(--b)}
+.s-APPROVED{background:#12392e;color:var(--ok);border-color:var(--ok)}.s-NEGOTIATING{background:#3a2f12;color:var(--wn);border-color:var(--wn)}.s-INFEASIBLE,.s-DEADLOCK{background:#3b1520;color:var(--no);border-color:var(--no)}.s-STALE{background:#3a2412;color:var(--ac);border-color:var(--ac)}
+.steps{display:flex;gap:6px;align-items:center}.st{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--p2);border:1px solid var(--b);color:var(--mu)}.st.on{background:var(--ac);color:#fff;border-color:var(--ac);box-shadow:0 0 12px var(--ac)}.st.done{background:#12392e;color:var(--ok);border-color:var(--ok)}
+main{display:grid;grid-template-columns:300px 1fr 330px;gap:14px;padding:14px;max-width:1700px;margin:auto}@media(max-width:1180px){main{grid-template-columns:minmax(220px, .72fr) minmax(0,1.6fr)}main>aside:last-of-type{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}}
+@media(max-width:760px){main{grid-template-columns:minmax(0,1fr);padding:12px}main>aside:last-of-type{grid-column:auto;display:block}header{gap:8px;padding:10px 12px}.steps{order:5;width:100%;justify-content:flex-start}#feed{height:55vh;min-height:320px}.card{padding:13px;margin-bottom:12px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.logo{font-size:16px}.kpi b{font-size:16px}.row{gap:5px}.g5{gap:3px}.g5 span{font-size:8px}#ring{min-width:0}}
+.card{background:var(--p);border:1px solid var(--b);border-radius:14px;padding:14px;margin-bottom:14px}h3{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--mu)}
+label{font-size:11px;color:var(--mu);display:block;margin:8px 0 3px}input,select{width:100%;background:var(--p2);color:var(--fg);border:1px solid var(--b);border-radius:8px;padding:7px 9px;font:inherit}input:focus,select:focus{outline:2px solid var(--ac);border-color:transparent}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.g5 span{font-size:9px;color:var(--mu);text-align:center;display:block}.g5 input{padding:6px 2px;text-align:center}
+button{cursor:pointer;border:0;border-radius:9px;padding:9px 12px;font:inherit;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--ac),#e5421f);width:100%;margin-top:8px;transition:.15s}button:hover{filter:brightness(1.12);transform:translateY(-1px)}button:disabled{opacity:.35;cursor:not-allowed;transform:none}
+button.g{background:var(--p2);border:1px solid var(--b);color:var(--fg)}.row{display:flex;gap:6px}.row button{margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}.chip{font-size:11px;padding:4px 9px;border-radius:99px;background:var(--p2);border:1px solid var(--b);cursor:pointer;color:var(--fg)}.chip:hover{border-color:var(--ac);color:var(--ac)}
+#ring{width:100%;height:auto;display:block}.node{cursor:pointer}.node circle.c{fill:var(--p2);stroke:var(--b);stroke-width:2;transition:.3s}.node:hover circle.c{stroke:var(--ac)}.node.sp circle.c{stroke:var(--ac2);filter:drop-shadow(0 0 10px var(--ac2))}.node.sel circle.c{stroke:var(--bl)}
+.node text{fill:var(--fg);text-anchor:middle;font-size:11px}.node .em{font-size:24px}.ln{stroke:var(--b);stroke-width:2;stroke-dasharray:4 5}.ln.on{stroke:var(--ac2);animation:fl .6s linear infinite}@keyframes fl{to{stroke-dashoffset:-9}}
+.pulse{animation:pu 1.2s ease-out infinite;fill:none;stroke:var(--ac2)}@keyframes pu{from{r:34;opacity:.9}to{r:52;opacity:0}}
+#feed{height:470px;overflow:auto;padding-right:6px;scroll-behavior:smooth}.dv{text-align:center;color:var(--mu);font-size:11px;margin:12px 0 6px;display:flex;align-items:center;gap:8px}.dv:before,.dv:after{content:"";flex:1;border-top:1px dashed var(--b)}
+.m{display:flex;gap:9px;margin:7px 0;animation:in .35s ease}@keyframes in{from{opacity:0;transform:translateY(8px)}}.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--p2);border:2px solid var(--b);flex:none;font-size:17px}
+.bd{background:var(--p2);border:1px solid var(--b);border-left:3px solid var(--c,var(--b));border-radius:4px 12px 12px 12px;padding:7px 11px;max-width:100%}.bd b{font-size:12px}.tg{font-size:10px;padding:1px 7px;border-radius:99px;margin-left:6px;background:#0006;color:var(--c,var(--mu));font-weight:700}.mt{font-size:10px;color:var(--mu);margin-left:6px}.bd p{margin:3px 0 0}
+.t-Proposal{--c:var(--bl)}.t-Counteroffer{--c:var(--wn)}.t-Objection{--c:var(--no)}.t-Commitment,.t-Vote-ACCEPT,.t-Approval{--c:var(--ok)}.t-Vote-REJECT{--c:var(--no)}.t-Event{--c:var(--ac)}
+.bar{height:9px;background:#0007;border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .6s}.bar i.w{background:var(--wn)}.bar i.x{background:var(--no)}
+.gr{display:grid;grid-template-columns:70px 1fr 58px;gap:8px;align-items:center;margin:7px 0;font-size:12px}.gr small{color:var(--mu);text-align:right}
+.mc{border:1px solid var(--b);border-radius:10px;padding:9px;margin-bottom:8px;background:var(--p2)}.mc.sel{border-color:var(--bl)}.mc .h{display:flex;justify-content:space-between;align-items:center}.mc small{color:var(--mu);display:block;margin-top:3px}
+.md{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px}.m0{background:#12392e;color:var(--ok)}.m1{background:#3a2f12;color:var(--wn)}.m2{background:#3b1520;color:var(--no)}
+.ck{display:flex;gap:8px;margin:6px 0;font-size:12px}.ck i{font-style:normal;font-weight:800}.ck.ok i{color:var(--ok)}.ck.no i{color:var(--no)}.ck span{color:var(--mu)}
+.tl{display:flex;flex-wrap:wrap;gap:6px}.tv{font-size:11px;padding:3px 9px;border-radius:8px;border:1px solid var(--b);background:var(--p2)}.tv.PASS{color:var(--wn);border-color:var(--wn)}.tv.FAIL,.tv.REJECTED{color:var(--no);border-color:var(--no)}.tv.APPROVED{background:#12392e;color:var(--ok);border-color:var(--ok)}
+#ban{border-radius:12px;padding:12px 14px;margin-bottom:14px;display:none;font-weight:600}#ban.APPROVED{display:block;background:#12392e;border:1px solid var(--ok)}#ban.INFEASIBLE,#ban.DEADLOCK{display:block;background:#3b1520;border:1px solid var(--no)}#ban.STALE{display:block;background:#3a2412;border:1px solid var(--ac)}
+.dots span{animation:bl 1.2s infinite;display:inline-block}.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}@keyframes bl{50%{opacity:.2}}
+#toast{position:fixed;bottom:18px;right:18px;background:var(--p2);border:1px solid var(--ac);padding:10px 14px;border-radius:10px;display:none;z-index:20;max-width:340px}dialog{background:var(--p);color:var(--fg);border:1px solid var(--b);border-radius:14px;width:min(420px,92vw)}dialog::backdrop{background:#000a}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-bottom:14px}.kpi{background:linear-gradient(160deg,var(--p),var(--p2));border:1px solid var(--b);border-radius:12px;padding:10px 12px}.kpi small{color:var(--mu);font-size:10px;text-transform:uppercase;letter-spacing:.1em}.kpi b{display:block;font-size:19px;margin-top:2px}.tb{height:4px;background:#0006;border-radius:3px;margin-top:6px;overflow:hidden}.tb i{display:block;height:100%;transition:width .5s}
+.arr{fill:none;stroke-width:3;stroke-linecap:round;stroke-dasharray:6 6;animation:fl .5s linear infinite,fo 3.2s forwards;filter:drop-shadow(0 0 4px currentColor)}@keyframes fo{0%,70%{opacity:1}100%{opacity:0}}
+.tf{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}.tf .chip.off{opacity:.3;text-decoration:line-through}.to{font-size:10px;color:var(--bl);margin-left:6px;font-weight:700}.tr{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:10px;color:var(--mu)}.tr .bar{flex:1;height:5px}
+.sb{animation:in .3s ease}
+/* ARES ACCORD UI refresh — layout, hierarchy, readability, and responsive behavior */
+:root{
+  color-scheme:dark;
+  --bg:#080b12;--p:#101624;--p2:#171f30;--b:#293750;
+  --fg:#eef3ff;--mu:#9aa8c2;--ac:#ff7955;--ac2:#ffc16b;
+  --ok:#48dfad;--no:#ff647d;--wn:#ffd166;--bl:#79bdff;
+}
+body{
+  background:
+    radial-gradient(900px 520px at 78% -12%,rgba(255,112,65,.13),transparent 66%),
+    radial-gradient(760px 500px at -12% 35%,rgba(64,130,210,.08),transparent 65%),
+    var(--bg);
+  letter-spacing:.005em;
+}
+header{
+  padding:13px clamp(14px,2.2vw,30px);
+  gap:12px;
+  background:rgba(8,11,18,.88);
+  border-bottom-color:rgba(121,151,197,.22);
+  box-shadow:0 8px 30px #0003;
+}
+.logo{font-size:19px;letter-spacing:.16em;white-space:nowrap}
+.pill{padding:5px 10px;line-height:1.2;white-space:nowrap}
+main{
+  grid-template-columns:minmax(225px,265px) minmax(380px,1fr) minmax(245px,290px);
+  gap:15px;padding:20px clamp(12px,2vw,28px);align-items:start;
+}
+main>aside{min-width:0}
+main>section{min-width:0}
+.card{
+  background:linear-gradient(145deg,rgba(19,27,43,.97),rgba(14,20,32,.98));
+  border:1px solid rgba(116,143,185,.2);
+  border-radius:16px;padding:16px;margin-bottom:16px;
+  box-shadow:0 8px 28px rgba(0,0,0,.14);
+}
+h3{font-size:10px;letter-spacing:.15em;color:#aab8d2;margin-bottom:13px}
+label{font-size:12px;color:#aab8d2;margin:10px 0 5px}
+input,select{
+  min-height:38px;background:#0c1321;border-color:#2a3a55;border-radius:9px;
+  padding:8px 10px;transition:border-color .15s,box-shadow .15s;
+}
+input:hover,select:hover{border-color:#526783}
+input:focus-visible,select:focus-visible,button:focus-visible,.chip:focus-visible{
+  outline:2px solid var(--ac2);outline-offset:2px;
+}
+button{
+  min-height:39px;border-radius:10px;
+  background:linear-gradient(115deg,#ff8056,#e95235);
+  box-shadow:0 5px 16px rgba(236,88,52,.13);
+}
+button.g{box-shadow:none;background:#192338;border-color:#35445f}
+button.g:hover{background:#202e46;border-color:#536989}
+button:disabled{box-shadow:none}
+.chip{padding:6px 10px;border-color:#30415d;background:#131d2e}
+.chip:hover{background:#202b40}
+#ring{max-height:390px}
+#feed{height:clamp(360px,56vh,610px);padding:4px 6px 4px 0}
+.m{gap:10px;margin:10px 0}
+.av{width:36px;height:36px;background:#1a263b;border-color:#34445f}
+.bd{background:#131d2e;border-color:#2a3a55;border-left:3px solid var(--c,var(--b));padding:9px 12px;border-radius:5px 12px 12px 12px;line-height:1.55}
+.bd b{font-size:12px;color:#f1f5ff}
+.bd p{font-size:13px;overflow-wrap:anywhere}
+.mt{font-size:11px}
+.gr{grid-template-columns:minmax(64px,84px) minmax(55px,1fr) 58px;gap:9px;font-size:12px;margin:10px 0}
+.bar{height:8px;background:#080d16;border:1px solid #26344a}
+.kpis{gap:10px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.kpi{padding:13px 14px;border-radius:13px;background:linear-gradient(145deg,#172238,#101725);border-color:#2b3a53}
+.kpi small{font-size:10px;line-height:1.4;color:#a7b5ce}
+.kpi b{font-size:22px;letter-spacing:-.025em}
+.mc{padding:11px;border-radius:12px;background:#121c2d;border-color:#2a3b56;border-left:2px solid var(--agent-color,var(--b));transition:border-color .2s,background .2s,transform .2s}.mc:hover{background:#172338}.mc.sel{border-color:var(--agent-color,var(--bl));box-shadow:0 0 0 1px color-mix(in srgb,var(--agent-color,var(--bl)) 18%,transparent),0 8px 22px #0002}
+#ban{line-height:1.55}
+dialog{padding:22px;box-shadow:0 25px 80px #0009}
+dialog::backdrop{backdrop-filter:blur(5px)}
+#toast{box-shadow:0 12px 35px #0007;max-width:min(360px,calc(100vw - 28px))}
+*{scrollbar-width:thin;scrollbar-color:#3a4a65 transparent}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#34445f;border-radius:9px;border:2px solid transparent;background-clip:padding-box}
+@media(min-width:1500px){
+  main{grid-template-columns:285px minmax(520px,1fr) 315px;gap:18px}
+}
+@media(max-width:1240px){
+  main{grid-template-columns:minmax(230px,.82fr) minmax(0,1.5fr);gap:14px}
+  main>section{grid-column:2;grid-row:1 / span 2}
+  main>aside:last-child{grid-column:1;grid-row:2}
+  #feed{height:480px}
+}
+@media(max-width:860px){
+  header{position:relative}
+  main{grid-template-columns:minmax(0,1fr);padding:12px;gap:0}
+  main>section,main>aside:last-child{grid-column:auto;grid-row:auto}
+  #ring{max-height:none}
+  #feed{height:420px}
+  .steps{order:5;width:100%;justify-content:flex-start}
+  header .sp{display:none}
+}
+@media(max-width:520px){
+  header{gap:8px;padding:12px}
+  .logo{font-size:16px}
+  .pill{font-size:10px;padding:5px 8px}
+  .card{padding:13px;border-radius:13px}
+  .g5{gap:4px}
+  .g5 span{font-size:8px}
+  .row{gap:7px}
+  .row button{padding:8px 7px;font-size:12px}
+  #feed{height:380px}
+  .av{width:30px;height:30px;font-size:15px}
+  .bd{padding:8px 9px}
+  .gr{grid-template-columns:66px minmax(35px,1fr) 52px;gap:6px;font-size:11px}
+  .kpi b{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
+
+
+/* Command table / mission patch visual language */
+#ring{max-height:470px;min-height:300px;overflow:visible}
+.node{cursor:pointer;outline:none}
+.node circle.c{fill:url(#nodeMetal);stroke:var(--agent-color,#7186a0);stroke-width:2;filter:drop-shadow(0 7px 9px #0007);transition:stroke .22s,stroke-width .22s,filter .22s}
+.node circle.rim{fill:none;stroke:var(--agent-color,#7186a0);stroke-opacity:.52;stroke-width:1;stroke-dasharray:2 5}.node circle.vote-ring{fill:none;stroke:transparent;stroke-width:2.5;opacity:0;transition:opacity .2s,stroke .2s}.node.vote-accept circle.vote-ring{stroke:var(--ok);opacity:1;filter:drop-shadow(0 0 5px #48dfad66)}.node.vote-reject circle.vote-ring{stroke:var(--no);opacity:1;filter:drop-shadow(0 0 5px #ff647d66)}
+.node:hover circle.c,.node:focus-visible circle.c{stroke:var(--agent-color,#ffc16b);stroke-width:3;filter:drop-shadow(0 0 9px color-mix(in srgb,var(--agent-color,#ffc16b) 55%,transparent))}
+.node.sel circle.c{stroke:var(--agent-color,#79bdff);stroke-width:3.5;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--agent-color,#79bdff) 60%,transparent))}
+.node.sp circle.c{stroke:var(--agent-color,#ffc16b);stroke-width:3.5;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--agent-color,#ffc16b) 70%,transparent))}
+.node text{paint-order:stroke;stroke:#0a101a;stroke-width:1px;stroke-linejoin:round}
+.node .em{stroke:none}
+.node .sub{font-weight:500}
+.ln{stroke:#2b3d55;stroke-width:1.5;stroke-dasharray:3 7;opacity:.8}
+.ln.on{stroke:#ffc16b;stroke-width:2.5;opacity:1;filter:drop-shadow(0 0 4px #ffc16b66)}
+.pulse{stroke:#ffc16b;stroke-width:1.5}
+@media(max-width:520px){#ring{min-height:260px}}
+
+
+/* Deep-space / Mars habitat atmosphere — decorative only, keeps controls readable */
+html{background:#070a12;scroll-behavior:smooth}
+body{isolation:isolate;position:relative;overflow-x:hidden;background:#070a12}
+.cosmos-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:
+    radial-gradient(ellipse at 50% 112%,rgba(196,76,44,.20),transparent 44%),
+    radial-gradient(ellipse at 82% 72%,rgba(255,117,75,.10),transparent 33%),
+    radial-gradient(ellipse at 14% 20%,rgba(75,124,191,.12),transparent 35%),
+    linear-gradient(180deg,#070a12 0%,#0b1120 54%,#10121d 100%)}
+.cosmos-bg:before{content:"";position:absolute;inset:0;opacity:.55;
+  background-image:
+    radial-gradient(1px 1px at 7% 13%,#fff 98%,transparent),
+    radial-gradient(1px 1px at 18% 71%,#b8d9ff 98%,transparent),
+    radial-gradient(1.5px 1.5px at 28% 32%,#fff 98%,transparent),
+    radial-gradient(1px 1px at 39% 84%,#d3e4ff 98%,transparent),
+    radial-gradient(1px 1px at 52% 18%,#fff 98%,transparent),
+    radial-gradient(1.5px 1.5px at 64% 56%,#ffd3b4 98%,transparent),
+    radial-gradient(1px 1px at 73% 9%,#fff 98%,transparent),
+    radial-gradient(1px 1px at 84% 38%,#d6e7ff 98%,transparent),
+    radial-gradient(1.5px 1.5px at 94% 78%,#fff 98%,transparent),
+    radial-gradient(1px 1px at 91% 17%,#fff 98%,transparent);
+  background-size:360px 260px;mask-image:linear-gradient(to bottom,black,rgba(0,0,0,.8) 65%,transparent)}
+.cosmos-bg:after{content:"";position:absolute;width:min(86vw,1050px);height:330px;left:50%;bottom:-255px;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(ellipse at 50% 0%,rgba(255,156,101,.27),rgba(177,65,48,.14) 34%,rgba(64,36,47,.04) 65%,transparent 72%);
+  box-shadow:0 -1px 45px rgba(255,126,82,.10)}
+body>*:not(.cosmos-bg){position:relative;z-index:1}
+header{background:rgba(7,10,18,.76);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-bottom-color:rgba(143,173,216,.18)}
+.logo{ text-shadow:0 0 24px rgba(255,121,85,.22)}
+main{position:relative}
+.card{background:linear-gradient(145deg,rgba(20,29,46,.86),rgba(11,17,29,.88));backdrop-filter:blur(14px) saturate(125%);-webkit-backdrop-filter:blur(14px) saturate(125%);border-color:rgba(139,166,207,.22);box-shadow:0 14px 36px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.025);transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease}
+.card:hover{border-color:rgba(255,164,117,.31);box-shadow:0 17px 40px rgba(0,0,0,.25),0 0 26px rgba(255,121,85,.035),inset 0 1px 0 rgba(255,255,255,.035)}
+.kpi{background:linear-gradient(145deg,rgba(24,36,56,.92),rgba(13,20,33,.92));box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 24px #0002}
+input,select{background:rgba(20,29,46,.88);border-color:rgba(137,162,201,.25);transition:border-color .18s,box-shadow .18s}
+input:focus,select:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(255,121,85,.13)}
+button{box-shadow:0 5px 16px rgba(220,74,39,.13);letter-spacing:.01em}
+button.g{box-shadow:none}
+button:focus-visible,.chip:focus-visible{outline:2px solid var(--ac2);outline-offset:3px}
+.chip{background:rgba(24,34,52,.78);border-color:rgba(137,162,201,.23);transition:all .18s ease}
+.chip:hover{background:rgba(60,39,38,.75);box-shadow:0 0 16px rgba(255,121,85,.08)}
+#feed{scrollbar-width:thin;scrollbar-color:#465773 transparent}
+#feed::-webkit-scrollbar{width:7px}#feed::-webkit-scrollbar-thumb{background:#35445d;border-radius:99px}
+::selection{background:rgba(255,121,85,.35);color:#fff}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+
+/* Final polish: clear mission identity, role-coded council, and readable responsive panels */
+.mission-strip{max-width:1700px;margin:18px auto 0;padding:0 clamp(12px,2vw,28px);display:flex;align-items:center;justify-content:space-between;gap:18px}
+.mission-copy{display:flex;align-items:center;gap:12px;min-width:0}
+.mission-mark{width:42px;height:42px;display:grid;place-items:center;flex:none;border-radius:13px;border:1px solid rgba(255,145,104,.35);background:linear-gradient(145deg,rgba(255,121,85,.16),rgba(74,119,174,.12));box-shadow:inset 0 1px #ffffff12,0 8px 24px #0003;color:#ffb18b;font-size:21px}
+.mission-eyebrow{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2);font-weight:800}
+.mission-title{font-size:clamp(16px,1.8vw,22px);letter-spacing:-.035em;font-weight:750;line-height:1.2;margin-top:3px}
+.mission-sub{font-size:11px;color:var(--mu);margin-top:4px}.scenario-name{color:#ffb18b;font-weight:700}
+.mission-meta{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.meta-chip{border:1px solid rgba(139,166,207,.2);background:rgba(20,29,46,.62);color:#aebbd2;border-radius:99px;padding:6px 10px;font-size:10px;white-space:nowrap}
+.node .em{filter:drop-shadow(0 1px 3px #0008)}
+.vote-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;color:var(--mu);font-size:10px;margin:-3px 0 8px}
+.feed-empty{min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px 16px;color:var(--mu)}.feed-empty-mark{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;font-size:24px;color:#ffb18b;border:1px solid #ff9b673d;background:radial-gradient(circle at 50% 25%,#ff9b6725,transparent 75%),#0e1727;box-shadow:0 0 36px #ff79550b,inset 0 1px #ffffff10;margin-bottom:14px}.feed-empty b{font-size:13px;color:#dfe8f8;font-weight:700}.feed-empty p{max-width:330px;margin:6px 0 0;font-size:11px;line-height:1.6}
+.legend-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:var(--c);box-shadow:0 0 9px color-mix(in srgb,var(--c) 45%,transparent)}
+.vote-label{display:inline-flex!important;align-items:center;gap:5px;margin:6px 0 0!important;padding:3px 7px;border-radius:7px;width:max-content;max-width:100%;font-size:10px!important;border:1px solid #ffffff12}
+.vote-label.accept{color:var(--ok);background:#48dfad0d;border-color:#48dfad38}
+.vote-label.reject{color:var(--no);background:#ff647d0d;border-color:#ff647d38}
+.vote-label.pending{color:var(--mu);background:#ffffff04}
+.ban-mark{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;background:#ffffff10;margin-right:7px;font-weight:900}.ban-detail{display:block;font-size:11px;font-weight:500;opacity:.84;margin:4px 0 0 30px}
+.card h3{display:flex;align-items:center;gap:8px}
+.card h3:before{content:"";width:3px;height:12px;border-radius:4px;background:linear-gradient(var(--ac),var(--ac2));box-shadow:0 0 10px #ff795522;flex:none}
+button:active{transform:translateY(0) scale(.99)}
+@media(max-width:760px){.mission-strip{margin-top:12px;align-items:flex-start}.mission-meta{display:none}.mission-mark{width:38px;height:38px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+
+.resource-legend,.resource-row{display:grid;grid-template-columns:minmax(76px,1.1fr) minmax(36px,.55fr) minmax(36px,.55fr) minmax(42px,.65fr);gap:5px;align-items:center}
+.resource-legend{font-size:9px;letter-spacing:.08em;color:var(--mu);padding:0 2px 7px;border-bottom:1px solid var(--b)}
+.resource-legend span:not(:first-child),.resource-value{text-align:right;font-variant-numeric:tabular-nums}
+.resource-row{padding:8px 2px;border-bottom:1px solid #ffffff0b;font-size:11px}
+.resource-row:last-child{border-bottom:0}.resource-name{font-weight:650;overflow-wrap:anywhere}.resource-value{color:#dfe8f8}.resource-value.reserve{color:var(--ok)}.resource-value.over{color:var(--no)}
+.resource-track{grid-column:1/-1;height:4px;border-radius:9px;background:#070b12;overflow:hidden;margin-top:1px}.resource-track i{height:100%;display:block;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:9px}
+@media(max-width:520px){.resource-legend,.resource-row{grid-template-columns:minmax(70px,1.1fr) repeat(3,minmax(34px,.55fr));gap:4px;font-size:10px}.resource-legend{font-size:8px}}
+@media(max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style></head><body>
+<div class="cosmos-bg" aria-hidden="true"></div>
+<header><div class="logo">ARES<b>·</b>ACCORD</div><span id="pst" class="pill">IDLE</span><span id="plan" class="pill">no plan</span><div class="steps" id="steps"></div><div class="sp"></div><span id="llm" class="pill" style="cursor:pointer" title="LLM settings" role="button" tabindex="0"></span></header>
+<div class="mission-strip"><div class="mission-copy"><div class="mission-mark" aria-hidden="true">✦</div><div><div class="mission-eyebrow">ARES / MARS OPERATIONS</div><div class="mission-title">Council Mission Control</div><div class="mission-sub"><span class="scenario-name" id="scen">Baseline scenario</span> · Multi-agent negotiation · independent validation</div></div></div><div class="mission-meta"><span class="meta-chip">◉ 5 council roles</span><span class="meta-chip">⌁ Versioned plans</span><span class="meta-chip">⬡ Rule-checked approval</span></div></div>
+<main>
+<aside>
+<div class="card"><h3>Resource pool</h3><div class="g5" id="pool"></div>
+<label>Tie-break when two plans are equal</label><select id="pol"><option value="bal">Balanced</option><option value="hab">Protect habitat</option><option value="rep">Protect repair capacity</option></select>
+<div class="row"><div style="flex:1"><label>Risk limit</label><input id="rl" type="number" value="24" min="0" max="100"></div><div style="flex:1"><label>Max sacrifices</label><input id="ms" type="number" value="1" min="0" max="4"></div></div>
+<button id="go">▶ Start crisis</button></div>
+<div class="card"><h3>Emergency injection</h3><div class="chips" id="chips"></div>
+<label>Event name</label><input id="evn" value="Solar aftershock"><label>Resource change (negative reduces)</label><div class="g5" id="ev"></div>
+<label style="margin-top:10px">Change the rules (current values shown)</label><div class="row"><div style="flex:1"><label>Risk limit</label><input id="erl" type="number" min="0" max="100"></div><div style="flex:1"><label>Max sacrifices</label><input id="ems" type="number" min="0" max="4"></div></div>
+<label style="display:flex;gap:7px;align-items:center;margin-top:10px"><input type="checkbox" id="ov" checked style="width:auto"> Allow Crisis Override (risk 28 · 2 sacrifices)</label>
+<button id="inj" disabled>⚡ Inject event</button></div>
+<div class="card"><h3>Tools</h3><div class="row"><button class="g" id="xj">Export JSON</button><button class="g" id="xc">Export CSV</button></div><div class="row"><button class="g" id="cfg">LLM settings</button><button class="g" id="rs">Reset</button></div></div>
+</aside>
+<section>
+<div class="kpis" id="kpis"></div>
+<div id="ban"></div>
+<div class="card"><h3>Council · select an agent to filter the transcript</h3><div class="vote-legend"><span><i class="legend-dot" style="--c:#ff9b67"></i>Command</span><span><i class="legend-dot" style="--c:#67d7d0"></i>Life support</span><span><i class="legend-dot" style="--c:#ff8da1"></i>Medical</span><span><i class="legend-dot" style="--c:#a8d77c"></i>Food</span><span><i class="legend-dot" style="--c:#8abaff"></i>Engineering</span><span><i class="legend-dot" style="--c:var(--ok)"></i>Accept ring</span><span><i class="legend-dot" style="--c:var(--no)"></i>Reject ring</span></div><svg id="ring" viewBox="0 0 520 390" role="group" aria-label="Interactive council diagram"></svg></div>
+<div class="card"><h3>Live negotiation <span id="flt"></span></h3><div class="tf" id="tf"></div><div id="feed"></div></div>
+</section>
+<aside>
+<div class="card"><h3>Resource accounting</h3><div class="resource-legend"><span>RESOURCE</span><span>POOL</span><span>USED</span><span>RESERVE</span></div><div id="gau" aria-live="polite"></div><div id="rsk" style="margin-top:10px;color:var(--mu)"></div></div>
+<div class="card"><h3>Mode board</h3><div id="brd"></div></div>
+<div class="card"><h3>Validator</h3><div id="val"><span style="color:var(--mu)">No plan yet</span></div></div>
+<div class="card"><h3>Plan versions</h3><div class="tl" id="tl"><span style="color:var(--mu)">—</span></div></div>
+</aside></main>
+<dialog id="dlg"><h3>LLM settings</h3><label>Provider</label><select id="lp"></select><label>Model</label><input id="lm"><label>Base URL</label><input id="lb"><label>API key (kept in backend memory only)</label><input id="lk" type="password">
+<label style="display:flex;gap:7px;align-items:center"><input type="checkbox" id="le" style="width:auto" checked> Use LLM for agents</label><div id="lr" style="margin:8px 0;font-size:12px"></div>
+<div class="row"><button class="g" id="lt">Test</button><button id="ls">Save</button><button class="g" id="lx">Close</button></div></dialog><div id="toast" role="status" aria-live="polite"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c])),E={LS:'🌬️',MED:'⚕️',FOOD:'🌱',ENG:'🔧',CMD:'🛰️',Validator:'🛡️'},POS={CMD:[260,180],LS:[85,75],MED:[435,75],FOOD:[85,290],ENG:[435,290]},RN={1:'Requests',2:'Counteroffers',3:'Sacrifice & selection',4:'Returns, validation & votes'},PRAC=[['Solar aftershock',[-4,0,0,0,0]],['Water contamination',[0,-3,0,0,0]],['Secondary oxygen leak',[0,0,-3,0,0]],['Rover actuator failure',[0,0,0,-4,0]],['Relay interference',[0,0,0,0,-2]]];
+let MT,ST,MS=[],last=0,seen=0,flt=null,busy=0;
+const nm=k=>k=='CMD'?'Commander':k=='Validator'?'Validator':MT.M[k][0];
+async function api(p,b){try{const r=await fetch(p,b===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const j=await r.json().catch(()=>({detail:'Server returned an unreadable response'}));if(!r.ok){toast(typeof j.detail==='string'?j.detail:'Request failed ('+r.status+')');return null}return j}catch(e){toast('Backend unreachable');return null}}
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',3500)}
+const tot=sel=>MT.R.map((_,i)=>MT.K.reduce((a,k)=>a+MT.M[k][1][sel[k]][1][i],0));
+function inputs(el,v){const pool=el.id==='pool';el.innerHTML=MT.R.map((r,i)=>`<div><span>${r.slice(0,5)}</span><input type=number step="1" min="${pool?0:-999}" max="999" aria-label="${r} ${pool?'pool amount':'resource delta'}" value="${v[i]}"></div>`).join('')}
+const vals=el=>[...el.querySelectorAll('input')].map(i=>+i.value||0);
+async function init(){MT=await api('/api/modes');if(!MT)return setTimeout(init,1500);inputs($('#pool'),[79,52,59,26,17]);inputs($('#ev'),[-4,0,0,0,0]);
+$('#chips').innerHTML=PRAC.map((p,i)=>`<span class=chip role=button tabindex=0 data-i=${i}>${p[0]}</span>`).join('')+'<span class=chip role=button tabindex=0 data-i=r>🎲 Random crisis</span><span class=chip role=button tabindex=0 data-i=t>🔒 Tight rules</span>';
+const pickChip=e=>{const t=e.target.closest('[data-i]');const i=t?.dataset.i;if(i==null)return;let n,d;if(i=='t'){n='Council tightens safety rules';d=[0,0,0,0,0];$('#erl').value=20;$('#ems').value=0}else if(i=='r'){d=[0,0,0,0,0];const c=1+Math.floor(Math.random()*3);for(let j=0;j<c;j++)d[Math.floor(Math.random()*5)]=-(1+Math.floor(Math.random()*8));n='Unseen crisis '+Math.floor(Math.random()*900+100)}else[n,d]=PRAC[i];$('#evn').value=n;inputs($('#ev'),d)};$('#chips').onclick=pickChip;$('#chips').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-i]')){e.preventDefault();pickChip(e)}};
+ring();tf();tick()}
+async function tick(){const s=await api('/api/state');if(s){const stateChanged=!ST||ST.running!==s.running||ST.status!==s.status;ST=s;const n=await api('/api/transcript?since='+last)||[];if(n.length){seen=Date.now();n.forEach(m=>{MS.push(m);last=m.id});if(n.some(m=>m.type=='Event'&&m.text.startsWith('EVENT')))toast('Event injected - plan marked STALE');}if(n.length||stateChanged)render(n)}setTimeout(tick,ST&&ST.running?600:1500)}
+function ring(){
+  let h='';
+  // soft orbital tracks and center hub establish a physical command-table feel
+  h += `<defs>
+    <radialGradient id="hubGlow"><stop offset="0" stop-color="#243d5a"/><stop offset="1" stop-color="#101827"/></radialGradient>
+    <linearGradient id="nodeMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#263750"/><stop offset="1" stop-color="#111a29"/></linearGradient>
+    <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <ellipse cx="260" cy="180" rx="190" ry="126" fill="none" stroke="#24334a" stroke-width="1" stroke-dasharray="2 8"/>
+  <ellipse cx="260" cy="180" rx="135" ry="86" fill="none" stroke="#1d2b40" stroke-width="1"/>
+  <circle cx="260" cy="180" r="65" fill="url(#hubGlow)" stroke="#344d6a" stroke-width="1.5"/>
+  <circle cx="260" cy="180" r="56" fill="none" stroke="#516a87" stroke-opacity=".45" stroke-dasharray="3 7"/>
+  <text x="260" y="166" text-anchor="middle" fill="#93a9c4" font-size="9" letter-spacing="2">MISSION</text>
+  <text x="260" y="184" text-anchor="middle" fill="#f2f6ff" font-size="13" font-weight="800" letter-spacing="1">COMMAND</text>
+  <text x="260" y="201" text-anchor="middle" fill="#ffb77c" font-size="9">ARES · 01</text>`;
+  MT.K.forEach(k=>h+=`<line class="ln" id="l${k}" x1="${POS[k][0]}" y1="${POS[k][1]}" x2="260" y2="180" />`);
+  const badge={
+    CMD:{n:"C",label:"COMMAND",sub:"Mission lead",color:"#ff9b67"},
+    LS:{n:"O₂",label:"LIFE SUPPORT",sub:"Atmosphere & water",color:"#67d7d0"},
+    MED:{n:"+",label:"MEDICAL",sub:"Crew health",color:"#ff8da1"},
+    FOOD:{n:"F",label:"FOOD SYSTEMS",sub:"Nutrition & stores",color:"#a8d77c"},
+    ENG:{n:"E",label:"ENGINEERING",sub:"Repairs & power",color:"#8abaff"}
+  };
+  ['CMD',...MT.K].forEach(k=>{
+    const [x,y]=POS[k],d=badge[k]||{n:k,label:k,sub:"Department",color:"#9bb8d6"};
+    h+=`<g class="node" id="n${k}" data-k="${k}" transform="translate(${x},${y})" style="--agent-color:${d.color}" role="button" tabindex="0" aria-label="Select ${d.label}" title="${d.label}">
+      <circle class="pulse" r="40" style="display:none"/>
+      <circle class="vote-ring" r="45"/>
+      <circle class="c" r="39"/>
+      <circle class="rim" r="32"/>
+      <text class="em" y="6" style="fill:${d.color};font-size:${k==='LS'?16:23}px;font-weight:800">${d.n}</text>
+      <text y="54" font-weight="800" style="font-size:10px;letter-spacing:.4px">${d.label}</text>
+      <text y="68" class="sub" style="fill:var(--mu);font-size:9px">${d.sub}</text>
+      <text id="nm${k}" y="82" style="fill:#ffbf80;font-size:9px"></text>
+    </g>`;
+  });
+  h+='<g id="arrows"></g><g id="spk"></g>';
+  $('#ring').innerHTML=h;
+  const choose=e=>{
+    const g=e.target.closest('.node');if(!g)return;
+    flt=flt==g.dataset.k?null:g.dataset.k;feed(true);render([]);
+  };
+  $('#ring').onclick=choose;
+  $('#ring').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('.node')){e.preventDefault();choose(e)}};
+}
+function render(nw){const S=ST,p=S.plan,L=S.llm;$('#scen').textContent=S.scen||'Baseline scenario';$('#pst').textContent=S.status;$('#pst').className='pill s-'+S.status;$('#plan').textContent=p?`plan v${p.ver} · ${p.status}`:'no plan';
+$('#llm').textContent=L.enabled?`🤖 LLM · ${L.provider}/${L.model}`:'⚙ Rule-based fallback · click to add LLM';$('#llm').style.borderColor=L.enabled?'var(--ok)':'var(--wn)';
+const mx=Math.max(4,S.round),progress=S.status=='APPROVED'?Math.max(4,S.round):S.round;$('#steps').innerHTML=Array.from({length:mx},(_,i)=>`<div class="st ${S.round==i+1&&S.running?'on':i+1<=progress?'done':''}" title="${RN[i+1]||'Revised plan'}">${i+1}</div>`).join('');
+$('#go').disabled=S.running;$('#inj').disabled=S.running||S.status!='APPROVED';
+const b=$('#ban');b.className=S.status;const lastA=[...MS].reverse().find(m=>m.type=='Approval'&&m.frm=='CMD');
+b.innerHTML=S.status=='APPROVED'?`<span class="ban-mark">●</span> Plan v${p.ver} approved <span class="ban-detail">Risk ${MT.K.reduce((a,k)=>a+MT.M[k][1][p.sel[k]][2],0)} · four ACCEPT votes · validator PASS</span>`:S.status=='INFEASIBLE'||S.status=='DEADLOCK'?`<span class="ban-mark">!</span> ${lastA?esc(lastA.text):esc(S.status)}`:S.status=='STALE'?'<span class="ban-mark">↻</span> Previous plan is STALE <span class="ban-detail">Agents are renegotiating against the updated situation.</span>':'';
+const t=p?tot(p.sel):[0,0,0,0,0];$('#gau').innerHTML=MT.R.map((r,i)=>{const pool=S.pool[i]??0,used=t[i]??0,reserve=pool-used,pc=pool?used/pool*100:used?100:0;return`<div class="resource-row"><span class="resource-name">${esc(r)}</span><span class="resource-value">${pool}</span><span class="resource-value ${used>pool?'over':''}">${used}</span><span class="resource-value reserve ${reserve<0?'over':''}">${reserve}</span><div class="resource-track"><i style="width:${Math.min(100,Math.max(0,pc))}%;background:${pc>100?'var(--no)':pc>92?'var(--wn)':'linear-gradient(90deg,var(--ac),var(--ac2))'}"></i></div></div>`}).join('');
+if(S.rule_lim!=null)[['erl',S.rule_lim],['ems',S.rule_sac]].forEach(([i,v])=>{if(document.activeElement!==$('#'+i))$('#'+i).value=v});
+$('#rsk').textContent=p?`Risk ${MT.K.reduce((a,k)=>a+MT.M[k][1][p.sel[k]][2],0)} / ${S.lim} · Sacrifices ${MT.K.filter(k=>p.sel[k]==2).length} / ${S.max_sac} · Reserve ${S.pool.map((v,i)=>v-t[i]).join(' / ')}`:`Pool ${S.pool.join(' / ')}`;
+const sp=MS.length&&Date.now()-seen<3000&&S.running?MS[MS.length-1].frm:null;
+MT.K.concat('CMD').forEach(k=>{const n=$('#n'+k);n.classList.toggle('sp',k==sp);n.classList.toggle('sel',k==flt);n.querySelector('.pulse').style.display=k==sp?'':'none';if(k=='CMD')return;$('#l'+k).classList.toggle('on',k==sp||sp=='CMD'&&S.running);
+$('#nm'+k).textContent=p?MT.M[k][1][p.sel[k]][0]:(S.agents[k]?MT.M[k][1][S.agents[k].cur][0]:'');const v=p&&p.votes[k];n.classList.toggle('vote-accept',!!v&&v.v=='ACCEPT');n.classList.toggle('vote-reject',!!v&&v.v=='REJECT');n.setAttribute('aria-label',`${nm(k)} · ${v?'Vote '+v.v+' on plan v'+p.ver:'Awaiting vote'} · select to filter transcript`);n.setAttribute('title',`${nm(k)}${v?' — '+v.v+' vote on plan v'+p.ver:''}`)});
+$('#brd').innerHTML=MT.K.map(k=>{const i=p?p.sel[k]:S.agents[k].cur,m=MT.M[k][1][i],c=p?p.commits.filter(x=>x.ben==k):[],v=p&&p.votes[k];return`<div class="mc ${k==flt?'sel':''}" style="--agent-color:${({LS:'#67d7d0',MED:'#ff8da1',FOOD:'#a8d77c',ENG:'#8abaff'})[k]||'#ff9b67'}"><div class=h><b>${nm(k)}</b><span class="md m${i}">${m[0]}</span></div><small>${i==2?'💥 '+MT.LOSS[k]:i==1?'Recovery debt, mission completes':'Full mission protected'} · risk ${m[2]}</small>${v?`<small class="vote-label ${v.v=='ACCEPT'?'accept':'reject'}">Vote · ${v.v} · plan v${p.ver}</small>`:`<small class="vote-label pending">Vote · pending</small>`}${c.map(x=>`<small>${x.ok?'✔':'○'} ${nm(x.owner)}: ${x.text}</small>`).join('')}<small>Refused sacrifice ×${S.agents[k].refusals}</small><div class=tr title='Derived from actions: commitments, accepted votes, refusals, rejected votes'>Cooperation<div class=bar><i style="width:${coop(k)}%"></i></div>${coop(k)}</div></div>`}).join('');
+$('#val').innerHTML=S.vr.length?S.vr.map(x=>`<div class="ck ${x.ok?'ok':'no'}"><i>${x.ok?'✓':'✗'}</i><div><b>${x.n}</b><br><span>${x.r}</span></div></div>`).join(''):'<span style="color:var(--mu)">No plan yet</span>';
+kpis();(nw||[]).slice(-3).forEach(fx);tl();feed(!!(nw&&nw.length&&(flt||off.size)),nw)}
+function tl(){const v={};MS.forEach(m=>{let r;if(m.frm=='Validator'&&(r=/Plan v(\d+): (PASS|FAIL)/.exec(m.text)))v[r[1]]={s:r[2],sc:m.scenario};if(m.type=='Approval'&&(r=/APPROVED plan v(\d+)/.exec(m.text)))v[r[1]].s='APPROVED';if(r=/Plan v(\d+) rejected/.exec(m.text))v[r[1]].s='REJECTED'});const e=Object.entries(v).slice(-10);
+$('#tl').innerHTML=e.length?e.map(([k,x])=>`<span class="tv ${x.s}" title="${esc(x.sc)}">v${k} ${x.s=='APPROVED'?'★ approved':x.s.toLowerCase()}</span>`).join(''):'—'}
+let pm=null;function bub(m){let h='';if(!pm||pm.scenario!=m.scenario||pm.round!=m.round)h=`<div class=dv>${esc(m.scenario)} · Round ${esc(m.round)} — ${RN[m.round]||'Revised plan & votes'}</div>`;pm=m;
+const src=m.source=='llm'?'🤖':m.source=='rule-fallback'?'⚠ fallback':'⚙';return h+`<div class="m t-${m.type}"><div class=av>${E[m.frm]||'👤'}</div><div class=bd><b>${esc(nm(m.frm))}</b><span class=tg>${esc(m.type.replace('Vote-','Vote '))}</span>${m.to&&m.to!='ALL'&&m.to!='CMD'?'<span class=to>↳ '+esc(nm(m.to))+'</span>':''}<span class=mt>v${esc(m.plan_version)} · ${src}</span><p>${esc(m.text)}</p></div></div>`}
+function feed(full,nw){const f=$('#feed'),near=f.scrollHeight-f.scrollTop-f.clientHeight<90;$('#flt').textContent=flt?`· ${nm(flt)} (click again to clear)`:'';
+if(full){pm=null;const items=MS.filter(show);f.innerHTML=items.map(bub).join('');if(!items.length&&!ST.running)f.innerHTML=`<div class="feed-empty"><div class="feed-empty-mark">⌁</div><b>${MS.length?'No messages match this filter':'Council standing by'}</b><p>${MS.length?'Choose another agent or message type to explore the transcript.':'Start a crisis to watch the five roles propose, challenge, negotiate, and vote on a shared plan.'}</p></div>`}else(nw||[]).filter(show).forEach(m=>{f.querySelector('.feed-empty')?.remove();f.insertAdjacentHTML('beforeend',bub(m))});
+const live=f.querySelector('.ty');if(ST.running){if(!live)f.insertAdjacentHTML('beforeend','<div class="ty dots" style="color:var(--mu);margin:8px 44px">agents deliberating <span>●</span><span>●</span><span>●</span> · waiting on model or negotiation step</div>')}else live?.remove();
+if(near||full)f.scrollTop=f.scrollHeight}
+$('#go').onclick=async()=>{const r=await api('/api/start',{pool:vals($('#pool')),policy:$('#pol').value,risk_limit:+$('#rl').value,max_sacrifices:+$('#ms').value});if(r)toast('Crisis started; council is negotiating.');};
+$('#inj').onclick=async()=>{const r=await api('/api/event',{name:$('#evn').value||'Emergency',delta:vals($('#ev')),allow_override:$('#ov').checked,risk_limit:$('#erl').value===''?null:+$('#erl').value,max_sacrifices:$('#ems').value===''?null:+$('#ems').value});if(r)toast('Emergency recorded; plan invalidated and council restarting.');};
+$('#rs').onclick=async()=>{if(ST?.running){toast('Wait for the current negotiation to finish before resetting.');return}if(confirm('Delete the whole negotiation history?')){const r=await api('/api/reset',{});if(r){MS=[];last=0;flt=null;pm=null;feed(true,[])}}};
+const dl=async(u,f)=>{try{const r=await fetch(u);if(!r.ok)throw Error('Export failed');const url=URL.createObjectURL(await r.blob()),a=document.createElement('a');a.href=url;a.download=f;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(e){toast('Could not export file. Is the backend running?')}};$('#xj').onclick=()=>dl('/api/export/json','ares_plan.json');$('#xc').onclick=()=>dl('/api/export/csv','ares_transcript.csv');
+async function lm(){const i=await api('/api/llm');if(!i)return;$('#lp').innerHTML=Object.keys(i.presets).map(k=>`<option ${k==i.provider?'selected':''}>${k}</option>`).join('');$('#lm').value=i.model;$('#lb').value=i.base;$('#lk').placeholder=i.key_set?'saved '+i.key_hint:'paste key';$('#le').checked=i.enabled||!i.key_set;$('#lp').onchange=()=>{$('#lm').value=i.presets[$('#lp').value].model;$('#lb').value=i.presets[$('#lp').value].base};$('#dlg').showModal()}
+const body=()=>({provider:$('#lp').value,model:$('#lm').value,base:$('#lb').value,api_key:$('#lk').value||null,enabled:$('#le').checked});$('#cfg').onclick=$('#llm').onclick=lm;$('#llm').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();lm()}};$('#lx').onclick=()=>$('#dlg').close();
+$('#lt').onclick=async()=>{$('#lr').textContent='Testing…';await api('/api/llm/config',body());const t=await api('/api/llm/test');$('#lr').innerHTML=t?(t.ok?`<span style=color:var(--ok)>✓ Connected: ${t.provider}/${t.model}</span>`:`<span style=color:var(--no)>✗ ${esc(t.error)}</span>`):''};
+$('#ls').onclick=async()=>{const saved=await api('/api/llm/config',body());if(saved){$('#dlg').close();toast('LLM settings saved')}};
+const TYPES=['Proposal','Counteroffer','Objection','Commitment','Vote','Approval','Event'],TC={Proposal:'#5aa9ff',Counteroffer:'#f5b942',Objection:'#ff4d6d',Commitment:'#2fd49a','Vote-ACCEPT':'#2fd49a','Vote-REJECT':'#ff4d6d',Approval:'#2fd49a',Event:'#ff6b3d'},off=new Set(),T={s:null,d:0};let spt;
+const tk=m=>m.type.startsWith('Vote')?'Vote':m.type,show=m=>(!flt||m.frm==flt||m.to==flt)&&!off.has(tk(m));
+function tf(){const e=$('#tf');e.innerHTML=TYPES.map(t=>`<span class=chip data-t=${t}>${t}</span>`).join('');e.onclick=ev=>{const t=ev.target.dataset.t;if(!t)return;off.has(t)?off.delete(t):off.add(t);[...e.children].forEach(c=>c.classList.toggle('off',off.has(c.dataset.t)));feed(true,[])}}
+function coop(k){const a=MS.filter(m=>m.frm==k),n=(f)=>a.filter(f).length;return Math.max(0,Math.min(100,50+12*n(m=>m.type=='Commitment')+6*n(m=>m.type=='Vote-ACCEPT')-4*n(m=>m.text.startsWith('REFUSE'))-6*n(m=>m.type=='Vote-REJECT')))}
+function fx(m){const a=POS[m.frm];if(!a)return;const tg=POS[m.to]&&m.to!=m.frm?m.to:m.frm!='CMD'?'CMD':null,col=TC[m.type]||'#fff';
+if(tg){const b=POS[tg],p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',`M${a[0]} ${a[1]} Q${(a[0]+b[0])/2+(b[1]-a[1])*.18} ${(a[1]+b[1])/2-(b[0]-a[0])*.18} ${b[0]} ${b[1]}`);p.setAttribute('class','arr');p.style.stroke=col;p.style.color=col;$('#arrows').appendChild(p);setTimeout(()=>p.remove(),3300)}
+let t=m.text.replace(/^REFUSE Sacrifice[^:]*: /,'');t=t.length>66?t.slice(0,64)+'…':t;let i=t.length>33?t.lastIndexOf(' ',33):-1;const l1=i>0?t.slice(0,i):t,l2=i>0?t.slice(i+1):'',x=a[0]<260?a[0]+42:a[0]>260?a[0]-232:a[0]-95,y=a[0]==260?a[1]+42:a[1]-20;
+$('#spk').innerHTML=`<g class=sb><rect x=${x} y=${y} width=190 height=42 rx=9 fill="#141824" stroke="${col}" stroke-width=1.5 /><text x=${x+8} y=${y+17} style="fill:#e9ecf5;font-size:10px">${esc(l1)}</text><text x=${x+8} y=${y+31} style="fill:#e9ecf5;font-size:10px">${esc(l2)}</text></g>`;clearTimeout(spt);spt=setTimeout(()=>$('#spk').innerHTML='',4500)}
+function kpis(){const S=ST,p=S.plan;if(S.running&&!T.s)T.s=Date.now();if(!S.running&&T.s){T.d=Date.now()-T.s;T.s=null}const el=T.s?Date.now()-T.s:T.d,f=ms=>Math.floor(ms/60000)+':'+String(Math.floor(ms/1000)%60).padStart(2,'0'),rk=p?MT.K.reduce((a,k)=>a+MT.M[k][1][p.sel[k]][2],0):0,sc=p?MT.K.filter(k=>p.sel[k]==2).length:0,t=p?tot(p.sel):[0,0,0,0,0],res=S.pool.reduce((a,v,i)=>a+v-t[i],0),lr=S.lim?rk/S.lim:0;
+const Kp=(l,v,pc,c)=>`<div class=kpi><small>${l}</small><b>${v}</b>${pc!=null?`<div class=tb><i style="width:${Math.min(100,pc)}%;background:${c||'var(--ok)'}"></i></div>`:''}</div>`;
+$('#kpis').innerHTML=Kp('Status',S.status)+Kp('Round',S.round||'—')+Kp('Plan',p?'v'+p.ver:'—')+Kp('Risk',rk+' / '+S.lim,lr*100,lr>1?'var(--no)':lr>.9?'var(--wn)':'var(--ok)')+Kp('Sacrifices',sc+' / '+S.max_sac,S.max_sac?sc/S.max_sac*100:0,'var(--ac)')+Kp('Validator',p?(S.vr.length&&S.vr.every(x=>x.ok)?'PASS':'CHECK'):'—')+Kp('Negotiation time',f(el)+' / 1:15',el/75000,el>60000?'var(--no)':'var(--ok)')}
+init();
+</script></body></html>

@@ -1,0 +1,28 @@
+
+# Local environments and secrets
+.venv/
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Python virtual environments and generated files
+.venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+**/.pytest_cache/
+
+# Local databases and secrets
+.env
+*.db
+*.sqlite
+*.sqlite3
+
+# Local development files
+.DS_Store
+Thumbs.db
+
+# SQLite temporary sidecar files
+*.db-shm
+*.db-wal
